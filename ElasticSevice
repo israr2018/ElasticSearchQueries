@@ -1,0 +1,56 @@
+const { Client } = require('@elastic/elasticsearch')
+class ElasticClient {
+  static init(){
+    return ElasticClient.getInstance()
+  }
+  static getInstance(){
+    if(!ElasticClient.instance){
+      let client = new Client({
+        node: 'http://10.10.7.2222:9200',
+        maxRetries: 5,
+        requestTimeout: 60000,
+        sniffOnStart:   false
+      })
+
+      ElasticClient.instance= client
+    }
+   return  ElasticClient.instance;
+  }
+}
+ class ElasticService{
+  static client="test"
+  // ElasticClient().init();
+  // constructor(){
+  //   this.client=ElasticClient.init()
+  // }
+  static async getComeraUserById(ids) {
+
+  const body={
+    "query" : {
+      "bool" : {
+        "filter" : {
+          "terms" : {
+            "_id" : ids
+          }
+        }
+      }
+    }
+  }
+    try {
+        // const response = await ElasticClient.init().search({ index: 'comera_users', body });
+        const response = await client.search({ index: 'comera_users', body });
+        const comera_users = response.body.hits.hits;
+        const ids= comera_users.map(x=>x._id);
+        return ids;
+    } catch (error) {
+      console.log(error.message)
+      throw new Error(error.message)
+    }
+    
+
+
+  }
+}
+
+
+module.exports = ElasticService;
