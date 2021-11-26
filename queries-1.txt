@@ -1,0 +1,64 @@
+GET raw-actions-*/_search?size=0
+{
+
+ "aggs": {
+   "calls": {
+     "filter": {
+       "term": {
+         "type": "CALL_LOG"
+       }
+     },
+     
+     "aggs": {
+       "data": {
+         "nested": {
+           "path": "data"
+         },
+         "aggs": {
+           "callTypes": {
+             "terms": {
+               "field": "data.callType"
+              
+             }
+           }
+         }
+       }
+     }
+    
+     
+   }
+   
+ }
+
+}
+
+  $aggs = [
+                "calls" => [
+                    "filter" => ["term" => ["type" => "CALL_LOG"]],
+                    "aggs" => [
+                        "data" => [
+                            "date_range" => [
+                                "field" => "timestamp",
+                                "ranges" => ["from" => "now/M", "to" => "now"]
+                            ]
+                        ]
+                    ]
+                    /*
+                    // count all calls
+                    "aggs" => ["data" => [
+                            "nested" => ["path" => "data"],
+                            "aggs" => ["callTypes" => [
+                                "terms" => ["field" => "data.callType"]],
+                            ]
+                        ]
+                    ]
+                    ****/
+                ]
+            ];
+            return $this->helper->indexQuery([
+                'index' => $this->_tableUsersHistory,
+                'type'  => $this->_type,
+                "body" => ["size" => 0, "sort" => ["timestamp" => "desc"], "aggs" => $aggs],
+            ], 'countCalls', '', env('ELASTIC_SEARCH_ON_PREM_SERVER_NAME'));
+        } catch (Exception $e) {
+
