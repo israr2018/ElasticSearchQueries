@@ -1,0 +1,31 @@
+GET last_seen_test/_search?size=30
+{
+  
+}
+
+POST _bulk
+{"index": { "_index": "last_seen_test" } }
+{ "lastSeenCount": 93815, "lastSeenDate": "2021-12-02"}
+{"index": { "_index": "last_seen_test" } }
+{ "lastSeenCount": 93800, "lastSeenDate": "2021-12-01"}
+ 
+
+GET last_seen_test/_search?size=0
+{
+   "query": {
+    "range": {
+       "lastSeenDate" : {
+                "gte": "2021-11-02",
+                "lte": "2021-12-02"
+              
+            }
+    }
+  },
+  "aggs": {
+    "monthly_active_users": {
+     "sum": {
+       "field": "lastSeenCount"
+     }
+    }
+  }
+}
